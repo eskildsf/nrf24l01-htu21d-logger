@@ -13,11 +13,8 @@ struct dataStruct{
   float humidity;
 }myData;
 
-bool success = false;
-
 int main(int argc, char** argv) {
   radio.begin();
-  //radio.setRetries(15,15);
   //radio.printDetails();
 
   radio.openWritingPipe(0xF0F0F0F0E1);
@@ -42,7 +39,6 @@ int main(int argc, char** argv) {
   } else {
     radio.read( &myData, sizeof(myData) );
     printf("T:%4.2f\nH:%4.2f", myData.temperature, myData.humidity);
-    success = true;
   }
   return 0;
 }
