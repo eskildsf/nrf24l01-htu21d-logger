@@ -18,6 +18,7 @@ void setup() {
   myHumidity.begin();
 
   radio.begin();
+  radio.setDataRate(RF24_250KBPS);
   radio.openWritingPipe(0xF0F0F0F0D2);
   radio.openReadingPipe(1,0xF0F0F0F0E1);
   radio.startListening();

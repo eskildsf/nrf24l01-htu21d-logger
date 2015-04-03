@@ -68,5 +68,5 @@ sudo python logger.py
 
 The program can be conveniently run in the background by using screen
 
-### Connections
+#### Connections
 Connect the NRF24L01 as described in the documentation for the RF24 library by TMRh20.

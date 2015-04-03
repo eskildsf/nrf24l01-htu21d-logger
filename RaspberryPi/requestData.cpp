@@ -15,6 +15,7 @@ struct dataStruct{
 
 int main(int argc, char** argv) {
   radio.begin();
+  radio.setDataRate(RF24_250KBPS);
   //radio.printDetails();
 
   radio.openWritingPipe(0xF0F0F0F0E1);
