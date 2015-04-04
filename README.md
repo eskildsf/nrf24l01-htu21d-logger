@@ -30,6 +30,7 @@ Since there are different devices (Arduino and Raspberry Pi) I thought it would 
 The Arduino code depends on the following libraries:
 * https://github.com/TMRh20/RF24
 * https://github.com/sparkfun/HTU21D_Breakout
+* https://github.com/rocketscream/Low-Power
 
 #### Setup
 Upload the Arduino program. That's it :-).
