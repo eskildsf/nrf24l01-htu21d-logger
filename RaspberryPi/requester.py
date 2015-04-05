@@ -62,13 +62,16 @@ if __name__ == "__main__":
         
     # Run indefinitely
     now = time.time()
-    while True:
-        delta = time.time() - now
-        if delta >= seconds_between_measurements:
-            now = now + 10
-            acquireData()
-        else:
-            if (seconds_between_measurements - delta) > 1.2:
-                time.sleep(1)
+    try:
+        while True:
+            delta = time.time() - now
+            if delta >= seconds_between_measurements:
+                now = now + 10
+                acquireData()
             else:
-                time.sleep(0.1)
+                if (seconds_between_measurements - delta) > 1.2:
+                    time.sleep(1)
+                else:
+                    time.sleep(0.1)
+    except KeyboardInterrupt:
+        pass

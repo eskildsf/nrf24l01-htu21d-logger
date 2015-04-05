@@ -16,6 +16,7 @@ I've chosen to use the NRF24L01 because it does two-way communication cheaply. Y
 I've implemented two different schemes:
 * Request data form the arduino at regular intervals
 * Listen to data that is sent form the arduino at regular intervals
+
 The first one enables good timing control over when the measurements are made. However it also consumes more power because it has to listen for a signal to make a measurement continously.
 
 #### In action:
