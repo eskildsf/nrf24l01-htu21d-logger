@@ -77,10 +77,7 @@ Install the gspread module for Python if you wish to log to Google Spreadsheet:
 pip install gspread
 ```
 
-The logger can now be run by issuing
-```bash
-sudo python requester.py
-```
+
 
 You can now run the logger by issuing
 ```bash
