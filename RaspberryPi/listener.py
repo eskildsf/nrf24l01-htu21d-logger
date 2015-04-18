@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     # Set up logging to std out
     log = logging.getLogger("nrf24l01-htu21d-logger")
-    log.setLevel(logging.INFO) #logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR
+    log.setLevel(logging.WARNING) #logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR
     ch = logging.StreamHandler()
     formatter = logging.Formatter('%(asctime)s: %(message)s', '%H:%M:%S')
     ch.setFormatter(formatter)
@@ -23,8 +23,8 @@ if __name__ == "__main__":
     # Worker thread that saves datapoints to a datastore.
     def worker():
         #db = datastore.GoogleSpreadsheet(config.get('GoogleSpreadsheet', 'username'), config.get('GoogleSpreadsheet', 'password'), config.get('GoogleSpreadsheet', 'spreadsheet'))
-        #db = datastore.Sqlite(config.get('sqlite', 'file'))
-        db = datastore.CSV(config.get('csv', 'file'))
+        db = datastore.Sqlite(config.get('sqlite', 'file'))
+        #db = datastore.CSV(config.get('csv', 'file'))
         while True:
             datapoint = q.get()
             didSave = db.save(datapoint)
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     
     # Set up interrupt on GPIO 17 to read incoming data
     def acquireData(channel):
-        data = radio.read(8)
+        data = radio.read(12)
         datapoint = datastore.dataPointFromRadioData(data)
         log.info('Logging %s', datapoint)
         q.put(datapoint)
