@@ -54,7 +54,7 @@ class Sqlite():
             self.cursor.execute('CREATE TABLE temperature_humidity (timestamp INTEGER, temperature INTEGER, humidity INTEGER, supplyvoltage INTEGER);')
             self.connection.commit()
     def save(self, datapoint):
-        self.cursor.execute('INSERT INTO temperature_humidity VALUES (?, ?, ?, ?)', (time.mktime(datapoint.datetime.timetuple()), int(datapoint.temperature*100), int(datapoint.humidity*100)))
+        self.cursor.execute('INSERT INTO temperature_humidity VALUES (?, ?, ?, ?)', (time.mktime(datapoint.datetime.timetuple()), int(datapoint.temperature*100), int(datapoint.humidity*100), datapoint.supplyvoltage))
         try:
             self.connection.commit()
             return True
