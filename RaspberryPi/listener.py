@@ -20,8 +20,13 @@ q = Queue.Queue(0)
 # Worker thread that saves datapoints to a datastore.
 def worker():
     #db = datastore.GoogleSpreadsheet(config.get('GoogleSpreadsheet', 'username'), config.get('GoogleSpreadsheet', 'password'), config.get('GoogleSpreadsheet', 'spreadsheet'))
-    db = datastore.Sqlite(config.get('sqlite', 'file'))
+    #db = datastore.Sqlite(config.get('sqlite', 'file'))
+    #db = datastore.Memcached(config.get('Memcached', 'server'))
     #db = datastore.CSV(config.get('csv', 'file'))
+    db = datastore.MultipleStores([
+        datastore.Sqlite(config.get('sqlite', 'file')),
+        datastore.Memcached(config.get('Memcached', 'server'), config.get('Memcached', 'nmeasurements')),
+        ])
     while True:
         datapoint = q.get()
         didSave = db.save(datapoint)

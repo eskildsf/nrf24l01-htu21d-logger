@@ -2,6 +2,8 @@ from collections import namedtuple
 import ctypes
 from datetime import datetime
 import time
+import json
+json.encoder.FLOAT_REPR = lambda o: format(o, '.2f')
 
 DataPoint = namedtuple('DataPoint', 'datetime temperature humidity supplyvoltage')
 
@@ -38,6 +40,22 @@ class GoogleSpreadsheet():
             return True
         except:
             return False
+
+class Memcached():
+    def __init__(self, server, size=10800):
+        import memcache
+        from collections import deque
+        self.mc = memcache.Client([server], debug=0)
+        self.d = deque(maxlen=size)
+    def save(self, datapoint):
+        self.d.append(datapoint)
+        data = data = [{
+        'timestamp': int(time.mktime(e.datetime.timetuple())),
+        'temperature': round(e.temperature,2),
+        'humidity': round(e.humidity,2),
+        'supplyvoltage': e.supplyvoltage,
+        } for e in self.d]
+        self.mc.set('temperature_humidity', json.dumps(data))
 
 class Sqlite():
     def __init__(self, database_path):
@@ -87,3 +105,14 @@ class CSV():
            writer = csv.writer(f, delimiter=';',quoting=csv.QUOTE_NONE)
            writer.writerow(data)
         return True
+
+class MultipleStores:
+    def __init__(self, stores):
+        self.stores = stores
+    def save(self, datapoint):
+        result = True
+        for store in self.stores:
+            r = store.save(datapoint)
+            if r is False:
+                result = False
+        return result
