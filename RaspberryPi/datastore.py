@@ -5,20 +5,22 @@ import time
 import json
 json.encoder.FLOAT_REPR = lambda o: format(o, '.2f')
 
-DataPoint = namedtuple('DataPoint', 'datetime temperature humidity supplyvoltage')
+DataPoint = namedtuple('DataPoint', 'device datetime temperature humidity supplyvoltage ts')
 
 # Measurememnt object
 class DataPointC(ctypes.Structure):
     _fields_ = [('temperature', ctypes.c_float), ('humidity', ctypes.c_float), ('supplyvoltage', ctypes.c_long)]
 
 # Convert from c struct to named tuple
-def dataPointFromRadioData(data):
+def dataPointFromRadioData(device, data):
     dataStructure = DataPointC.from_buffer_copy(data)
     datapoint = DataPoint(
+        device = device,
         datetime = datetime.now().replace(microsecond = 0),
         temperature = dataStructure.temperature,
         humidity = dataStructure.humidity,
-        supplyvoltage = dataStructure.supplyvoltage
+        supplyvoltage = dataStructure.supplyvoltage,
+        ts = time.mktime(datetime.now().replace(microsecond=0).timetuple()),
     )
     return datapoint
 
@@ -50,6 +52,7 @@ class Memcached():
     def save(self, datapoint):
         self.d.append(datapoint)
         data = data = [{
+        'device': e.device,
         'timestamp': int(time.mktime(e.datetime.timetuple())),
         'temperature': round(e.temperature,2),
         'humidity': round(e.humidity,2),
@@ -66,13 +69,14 @@ class Sqlite():
         self.setup()
     def setup(self):
         # Does the table exist?
-        self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='temperature_humidity';")
+        self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='th_data';")
         # If it doesn't exist then we should create it
         if self.cursor.fetchone() is None:
-            self.cursor.execute('CREATE TABLE temperature_humidity (timestamp INTEGER, temperature INTEGER, humidity INTEGER, supplyvoltage INTEGER);')
+            self.cursor.execute('CREATE TABLE th_data (device TEXT, timestamp INTEGER, temperature INTEGER, humidity INTEGER, supplyvoltage INTEGER);')
             self.connection.commit()
     def save(self, datapoint):
-        self.cursor.execute('INSERT INTO temperature_humidity VALUES (?, ?, ?, ?)', (time.mktime(datapoint.datetime.timetuple()), int(datapoint.temperature*100), int(datapoint.humidity*100), datapoint.supplyvoltage))
+        self.connection.ping(True)
+        self.cursor.execute('INSERT INTO th_data VALUES (%s, %s, %s, %s, %s)', [datapoint.device, time.mktime(datapoint.datetime.timetuple()), int(datapoint.temperature*100), int(datapoint.humidity*100), datapoint.supplyvoltage])
         try:
             self.connection.commit()
             return True
@@ -88,9 +92,21 @@ class Sqlite():
             return DataPoint(datetime = date, temperature = T, humidity = H, supplyvoltage = V)
         self.connection.row_factory = DataPointFactory
         cursor = self.connection.cursor()
-        cursor.execute('SELECT * FROM temperature_humidity ORDER BY timestamp ASC;')
+        cursor.execute('SELECT * FROM th_data ORDER BY timestamp ASC;')
         return cursor.fetchall()
 
+class Mysql(Sqlite):
+    def __init__(self, server, database, user, password):
+        import MySQLdb  
+        self.connection = MySQLdb.connect(server, user, password, database)
+        self.connection.ping(True)
+        self.cursor = self.connection.cursor()
+        self.setup()
+    def setup(self):
+        self.cursor.execute("SHOW TABLES LIKE 'th_data';")
+        if self.cursor.fetchone() is None:
+            self.cursor.execute('CREATE TABLE th_data (device VARCHAR(255), timestamp INTEGER, temperature INTEGER, humidity INTEGER, supplyvoltage INTEGER);')
+            self.connection.commit()
 class CSV():
     def __init__(self, file):
         self.file = file
