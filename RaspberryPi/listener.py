@@ -34,6 +34,7 @@ def worker():
         if didSave is False:
             log.error('Could not save %s', datapoint)
             q.put(datapoint)
+            time.sleep(10)
 thread = threading.Thread(target=worker)
 thread.daemon = True
 thread.start()
@@ -55,6 +56,9 @@ radio.startListening()
 def acquireData(channel):
     null, pipe = radio.available_pipe()
     data = radio.read(12)
+    if pipe not in pipes:
+        log.debug('Received data from unknown pipe.')
+        return None
     device = pipes[pipe]
     datapoint = datastore.dataPointFromRadioData(device, data)
     log.info('Logging %s', datapoint)

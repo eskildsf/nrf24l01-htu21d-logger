@@ -75,9 +75,9 @@ class Sqlite():
             self.cursor.execute('CREATE TABLE th_data (device TEXT, timestamp INTEGER, temperature INTEGER, humidity INTEGER, supplyvoltage INTEGER);')
             self.connection.commit()
     def save(self, datapoint):
-        self.connection.ping(True)
-        self.cursor.execute('INSERT INTO th_data VALUES (%s, %s, %s, %s, %s)', [datapoint.device, time.mktime(datapoint.datetime.timetuple()), int(datapoint.temperature*100), int(datapoint.humidity*100), datapoint.supplyvoltage])
         try:
+            self.connection.ping(True)
+            self.cursor.execute('INSERT INTO th_data VALUES (%s, %s, %s, %s, %s)', [datapoint.device, time.mktime(datapoint.datetime.timetuple()), int(datapoint.temperature*100), int(datapoint.humidity*100), datapoint.supplyvoltage])
             self.connection.commit()
             return True
         except:
