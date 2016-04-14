@@ -97,11 +97,17 @@ class Sqlite():
 
 class Mysql(Sqlite):
     def __init__(self, server, database, user, password):
-        import MySQLdb  
-        self.connection = MySQLdb.connect(server, user, password, database)
-        self.connection.ping(True)
-        self.cursor = self.connection.cursor()
-        self.setup()
+        import MySQLdb
+        connected = False
+        while connected is False:
+            try:
+                self.connection = MySQLdb.connect(server, user, password, database)
+                self.connection.ping(True)
+                self.cursor = self.connection.cursor()
+                self.setup()
+                connected = True
+            except:
+                pass
     def setup(self):
         self.cursor.execute("SHOW TABLES LIKE 'th_data';")
         if self.cursor.fetchone() is None:

@@ -47,7 +47,7 @@ radio.openWritingPipe(config.get('DeviceId', 'raspberrypi'))
 devices = eval(config.get('DeviceId', 'arduino'))
 pipes = {}
 for i, (name, id) in enumerate(devices.items(), 1):
-    radio.openReadingPipe(i,id)
+    radio.openReadingPipe(i,eval(id))
     pipes[i] = name
     log.info('Setting up reading pipe for %s on %s', name, id)
 radio.startListening()
